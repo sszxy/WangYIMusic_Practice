@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawerlayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.wangyimusic.MainActivity">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/my_toolbar"
+            android:layout_width="match_parent"
+            android:minHeight="?attr/actionBarSize"
+            android:fitsSystemWindows="true"
+            app:contentInsetStart="0.0dp"
+            android:background="@color/colorTheme"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/AlertDialog.AppCompat.Light"
+            android:layout_height="wrap_content">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                >
+                <ImageView
+                    android:id="@+id/drawerlayoutbt"
+                    android:clickable="true"
+                    android:layout_width="25dp"
+                    android:layout_height="45dp"
+                    android:scaleType="centerInside"
+                    android:layout_centerVertical="true"
+                    android:layout_alignBaseline="@+id/musicIcon"
+                    android:layout_marginStart="25dp"
+                    android:src="@drawable/actionbar_menu"
+                    />
+                <ImageView
+                    android:clickable="true"
+                    android:id="@+id/musicIcon"
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:layout_toLeftOf="@+id/WangyiIcon"
+                    android:background="@drawable/music"/>
+                <ImageView
+                    android:clickable="true"
+                    android:id="@+id/WangyiIcon"
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/discover"/>
+                <ImageView
+                    android:clickable="true"
+                    android:id="@+id/friendIcon"
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:layout_toRightOf="@+id/WangyiIcon"
+                    android:background="@drawable/friends"/>
+            </RelativeLayout>
+
+        </android.support.v7.widget.Toolbar>
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/item_viewpager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                >
+
+            </android.support.v4.view.ViewPager>
+        </LinearLayout>
+        <FrameLayout
+            android:id="@+id/framelayout"
+            android:background="#ffffff"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_alignParentBottom="true">
+            <ImageView
+                android:src="@drawable/demo"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="10dp"
+                android:layout_width="45dp"
+                android:layout_height="45dp" />
+            <TextView
+                android:id="@+id/songname"
+                android:textColor="#000000"
+                android:text="车站（live）"
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="70dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/singername"
+                android:text="李健"
+                android:layout_marginTop="28dp"
+                android:layout_marginLeft="70dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <ImageView
+                android:id="@+id/songimg"
+                android:layout_gravity="center_vertical|right"
+                android:background="@drawable/playbar_btn_playlist"
+                android:layout_width="50dp"
+                android:layout_height="match_parent" />
+        </FrameLayout>
+    </RelativeLayout>
+    <android.support.design.widget.NavigationView
+        android:id="@+id/naview"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/headerlayout"
+        app:menu="@menu/drawer_menu">
+    </android.support.design.widget.NavigationView>
+
+</android.support.v4.widget.DrawerLayout>
