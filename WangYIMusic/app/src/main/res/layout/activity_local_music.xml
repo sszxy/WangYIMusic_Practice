@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LocalMusicActivity">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:minHeight="?attr/actionBarSize"
+        android:fitsSystemWindows="true"
+        app:contentInsetStart="0.0dp"
+        android:background="@color/colorTheme"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/AlertDialog.AppCompat.Light"
+        android:layout_height="wrap_content">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            >
+            <ImageView
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:src="@drawable/actionbar_back"
+                android:layout_width="30dp"
+                android:layout_height="20dp" />
+            <TextView
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="48dp"
+                android:text="本地音乐"
+                android:textColor="@color/textcolor_white"
+                android:textSize="15dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
+    </android.support.v7.widget.Toolbar>
+    <android.support.v7.widget.RecyclerView
+        android:layout_below="@id/my_toolbar"
+        android:id="@+id/local_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </android.support.v7.widget.RecyclerView>
+    <FrameLayout
+        android:id="@+id/framelayout"
+        android:background="#ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_alignParentBottom="true">
+        <ImageView
+            android:transitionName="transition"
+            android:src="@drawable/demo"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="10dp"
+            android:layout_width="45dp"
+            android:layout_height="45dp" />
+        <TextView
+            android:id="@+id/songname"
+            android:textColor="#000000"
+            android:text="车站（live）"
+            android:layout_marginTop="8dp"
+            android:layout_marginLeft="70dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/singername"
+            android:text="李健"
+            android:layout_marginTop="28dp"
+            android:layout_marginLeft="70dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/songimg"
+            android:layout_gravity="center_vertical|right"
+            android:background="@drawable/playbar_btn_playlist"
+            android:layout_width="50dp"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+
+
+</RelativeLayout>

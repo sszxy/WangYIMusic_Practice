@@ -6,4 +6,8 @@
     <color name="colorTheme">#f14949</color>
     <color name="textcolortheme">#212020</color>
     <color name="itemlinecolor">#e2dfdf</color>
+    <color name="bgcolortheme">#fbf8f8</color>
+    <color name="textcolor_white">#ffffff</color>
+    <color name="line_normal">#e7e4e4</color>
+
 </resources>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_marginTop="10dp"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <ImageView
+        android:id="@+id/song_list_item_img"
+        android:layout_width="190dp"
+        android:layout_height="200dp" />
+    <TextView
+        android:includeFontPadding="false"
+        android:textColor="@color/textcolortheme"
+        android:id="@+id/song_list_item_tv"
+        android:gravity="left"
+        android:textSize="15dp"
+        android:text="asdfasdfsdfsa"
+        android:layout_width="150dp"
+        android:maxLines="2"
+        android:layout_height="35dp" />
+</LinearLayout>

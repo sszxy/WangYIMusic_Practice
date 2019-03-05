@@ -61,6 +61,15 @@
                     android:layout_height="55dp"
                     android:layout_toRightOf="@+id/WangyiIcon"
                     android:background="@drawable/friends"/>
+                <ImageView
+                    android:clickable="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="20dp"
+                    android:id="@+id/search_icon"
+                    android:layout_alignParentEnd="true"
+                    android:src="@drawable/actionbar_search"
+                    android:layout_width="25dp"
+                    android:layout_height="30dp" />
             </RelativeLayout>
 
         </android.support.v7.widget.Toolbar>
@@ -80,6 +89,8 @@
             android:layout_height="55dp"
             android:layout_alignParentBottom="true">
             <ImageView
+                android:transitionName="transition"
+                android:id="@+id/music_img"
                 android:src="@drawable/demo"
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="10dp"

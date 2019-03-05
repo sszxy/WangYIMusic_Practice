@@ -3,9 +3,4 @@
     <declare-styleable name="playView">
         <attr name="bitmapsrc" format="reference"></attr>
     </declare-styleable>
-
-
-
-
-
 </resources>

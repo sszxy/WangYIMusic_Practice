@@ -6,8 +6,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -37,7 +39,15 @@ public class playView extends View {
     public playView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
+    public void setBitmap(Bitmap bitmap){
+        int width=bitmap.getWidth();
+        int height=bitmap.getHeight();
+        float scale=((float) (getWidth()-135))/width;
+        Matrix x=new Matrix();
+        x.postScale(scale,scale);
+        this.bitmap=Bitmap.createBitmap(bitmap,0,0,width,height,x,true);
+        invalidate();
+    }
     @Override
     protected void onDraw(Canvas canvas) {
         paint=new Paint();
@@ -49,6 +59,6 @@ public class playView extends View {
         Path path=new Path();
         path.addCircle(width/2,hight/2,width/2-135, Path.Direction.CW);
         canvas.clipPath(path);
-        canvas.drawBitmap(bitmap,55,55,paint);
+        canvas.drawBitmap(bitmap,135,135,paint);
     }
 }
