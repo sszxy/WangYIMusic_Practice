@@ -56,7 +56,7 @@ public class SecondActivity extends BaseActivity {
     bitmapview bitmapview;
     playView playView;
     ObjectAnimator playanimatior;
-    RelativeLayout relativeLayout,relative;
+    RelativeLayout relativeLayout, relative;
     TextView songtv;
     TextView singtv;
     TextView mPTimeTv;
@@ -71,37 +71,38 @@ public class SecondActivity extends BaseActivity {
     Handler handler;
     Runnable playrunnable;
     ImageView imageView;
-    List<MusicItem> musicItemList =new ArrayList<>();
+    List<MusicItem> musicItemList = new ArrayList<>();
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     int position;
     MusicItem playingitem;
-    private SimpleTarget target=new SimpleTarget<Bitmap>() {
+    private SimpleTarget target = new SimpleTarget<Bitmap>() {
         @Override
         public void onResourceReady(Bitmap resource, GlideAnimation glideAnimation) {
             playView.setBitmap(resource);
         }
     };
 
-    BroadcastReceiver broadcastReceiver=new BroadcastReceiver() {
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getAction().equals("STATUS_BAR_COVER_CLICK_ACTION")){
+            if (intent.getAction().equals("STATUS_BAR_COVER_CLICK_ACTION")) {
                 initstartplay();
             }
         }
     };
 
-    public ServiceConnection connection=new ServiceConnection() {
+    public ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            binder= (MyService.playBinder) service;
-            musicItemList =binder.getMusicList();
+            binder = (MyService.playBinder) service;
+            musicItemList = binder.getMusicList();
+            Log.d("tag",musicItemList.size()+"");
             initbg();
-            if (sharedPreferences.getInt("play_method",0)==0){
+            if (sharedPreferences.getInt("play_method", 0) == 0) {
                 binder.setplaymethod(0);
-            }else {
-                binder.setplaymethod(0);
+            } else {
+                binder.setplaymethod(1);
             }
         }
 
@@ -116,24 +117,24 @@ public class SecondActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        View decorView=getWindow().getDecorView();
-        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         setContentView(R.layout.activity_second);
-        toolbar= (Toolbar) findViewById(R.id.playtoolbar);
-        lrcView= (LrcView) findViewById(R.id.lrcview);
+        toolbar = (Toolbar) findViewById(R.id.playtoolbar);
+        lrcView = (LrcView) findViewById(R.id.lrcview);
         toolbar.bringToFront();
         initview();
-        final Intent intent=new Intent(this,MyService.class);
-        bindService(intent,connection,BIND_AUTO_CREATE);
-        bitmapview= (com.example.wangyimusic.bitmapview) findViewById(R.id.bitmapview);
-        relativeLayout= (RelativeLayout) findViewById(R.id.myrelative);
-        playView= (com.example.wangyimusic.playView) findViewById(R.id.playview);
-        playView.setLayerType(View.LAYER_TYPE_SOFTWARE,null);//在View级别禁用硬件加速，因为内部使用到clippath
+        final Intent intent = new Intent(this, MyService.class);
+        bindService(intent, connection, BIND_AUTO_CREATE);
+        bitmapview = (com.example.wangyimusic.bitmapview) findViewById(R.id.bitmapview);
+        relativeLayout = (RelativeLayout) findViewById(R.id.myrelative);
+        playView = (com.example.wangyimusic.playView) findViewById(R.id.playview);
+        playView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);//在View级别禁用硬件加速，因为内部使用到clippath
         playView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               initLrc();
+                initLrc();
             }
         });
         lrcView.setOnClickListener(new View.OnClickListener() {
@@ -144,22 +145,21 @@ public class SecondActivity extends BaseActivity {
             }
         });
         initSeekbar();
-        IntentFilter intentFilter=new IntentFilter();
+        IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("STATUS_BAR_COVER_CLICK_ACTION");
-        registerReceiver(broadcastReceiver,intentFilter);
-        controlview=(com.example.wangyimusic.controlview) findViewById(R.id.controlview);
+        registerReceiver(broadcastReceiver, intentFilter);
+        controlview = (com.example.wangyimusic.controlview) findViewById(R.id.controlview);
         controlview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!binder.isplaying()){
+                if (!binder.isplaying()) {
                     binder.startplay();
-                    controlview.zhuangtai=false;
+                    controlview.zhuangtai = false;
                     controlview.invalidate();
                     initRotation();
-                }
-                else {
+                } else {
                     binder.pause();
-                    controlview.zhuangtai=true;
+                    controlview.zhuangtai = true;
                     controlview.invalidate();
                     pauseplay();
                 }
@@ -167,28 +167,32 @@ public class SecondActivity extends BaseActivity {
         });
     }
 
-    private void initRotation(){
+    private void initRotation() {
         bitmapview.setPivotX(60);
         bitmapview.setPivotY(80);
         handler.post(playrunnable);
-        ObjectAnimator animator=ObjectAnimator.ofFloat(bitmapview,"rotation",0,30);
+        ObjectAnimator animator = ObjectAnimator.ofFloat(bitmapview, "rotation", 0, 30);
         animator.setDuration(500);
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                playanimatior.resume();
+                if (playanimatior == null) {
+                    init();
+                } else {
+                    playanimatior.resume();
+                }
             }
         });
         animator.start();
     }
 
     private void init() {
-        if (playanimatior!=null&&playanimatior.isRunning()){
-            Log.d("tag","sdklajf");
+        if (playanimatior != null && playanimatior.isRunning()) {
+            Log.d("tag", "sdklajf");
             playanimatior.cancel();
         }
-        playanimatior=ObjectAnimator.ofFloat(playView,"rotation",0,359);
+        playanimatior = ObjectAnimator.ofFloat(playView, "rotation", 0, 359);
         playanimatior.setDuration(8000);
         playanimatior.setRepeatCount(1000);
         playanimatior.setInterpolator(new LinearInterpolator());
@@ -196,45 +200,48 @@ public class SecondActivity extends BaseActivity {
     }
 
 
-    public  void initbg(){
-        Glide.with(SecondActivity.this).load(playingitem.getBkimg()).bitmapTransform(new BlurTransformation(SecondActivity.this, 20, 3) ).into(imageView);
+    public void initbg() {
+        Glide.with(SecondActivity.this).load(playingitem.getBkimg()).bitmapTransform(new BlurTransformation(SecondActivity.this, 20, 3)).into(imageView);
         Glide.with(SecondActivity.this).load(playingitem.getBkimg()).asBitmap().into(target);
         songtv.setText(playingitem.getMusicname());
         singtv.setText(playingitem.getMusicauthor());
         seekBar.setMax(binder.getMax());
         seekBar.setProgress(binder.getprogress());
         mMTimeTv.setText(getTime(binder.getMax()));
-        boolean isplaying=binder.isplaying();
-        if (isplaying){
+        boolean isplaying = binder.isplaying();
+        if (isplaying) {
             initstartplay();
-            controlview.zhuangtai=false;
+            controlview.zhuangtai = false;
             controlview.invalidate();
+        } else {
+
         }
-        int method=sharedPreferences.getInt("play_method",0);
-        if (method==0){
-        }else{
+        int method = sharedPreferences.getInt("play_method", 0);
+        if (method == 0) {
+        } else {
         }
     }
 
-    public String getTime(int time){
-        int second=time/1000%60;
-        int minute=time/1000/60;
-        if (minute<9){
-            if(second<9){
-               return "0"+String.valueOf(minute)+":0"+String.valueOf(second);
-            }else {
-                return "0"+String.valueOf(minute)+":"+String.valueOf(second);
+    public String getTime(int time) {
+        int second = time / 1000 % 60;
+        int minute = time / 1000 / 60;
+        if (minute < 9) {
+            if (second < 9) {
+                return "0" + String.valueOf(minute) + ":0" + String.valueOf(second);
+            } else {
+                return "0" + String.valueOf(minute) + ":" + String.valueOf(second);
             }
-        }else{
-            if(second<9){
-                return String.valueOf(minute)+":0"+String.valueOf(second);
-            }else {
-                return "0"+String.valueOf(minute)+":"+String.valueOf(second);
+        } else {
+            if (second < 9) {
+                return String.valueOf(minute) + ":0" + String.valueOf(second);
+            } else {
+                return "0" + String.valueOf(minute) + ":" + String.valueOf(second);
             }
         }
     }
-    public void initLrc(){
-        OkHttpUtil.GetHttp(playingitem.getLrc(), new Callback() {
+
+    public void initLrc() {
+        OkHttpUtil.getHttp(playingitem.getLrc(), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
 
@@ -242,8 +249,8 @@ public class SecondActivity extends BaseActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                InputStream inputStream=response.body().byteStream();
-                final LrcBean bean=LrcAnalyze.AnalyzeLrc(inputStream,"UTF8");
+                InputStream inputStream = response.body().byteStream();
+                final LrcBean bean = LrcAnalyze.AnalyzeLrc(inputStream, "UTF8");
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -256,21 +263,22 @@ public class SecondActivity extends BaseActivity {
             }
         });
     }
-    public void initSeekbar(){
-        seekBar= (SeekBar) findViewById(R.id.seekbar);
-        handler=new Handler();
-        playrunnable=new Runnable() {
+
+    public void initSeekbar() {
+        seekBar = (SeekBar) findViewById(R.id.seekbar);
+        handler = new Handler();
+        playrunnable = new Runnable() {
             @Override
             public void run() {
                 seekBar.setProgress(binder.getprogress());
                 mPTimeTv.setText(getTime(binder.getprogress()));
-                handler.postDelayed(playrunnable,200);
+                handler.postDelayed(playrunnable, 200);
             }
         };
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(fromUser==true){
+                if (fromUser == true) {
                     binder.seekto(progress);
                 }
             }
@@ -286,11 +294,12 @@ public class SecondActivity extends BaseActivity {
             }
         });
     }
-    public void initstartplay(){
+
+    public void initstartplay() {
         bitmapview.setPivotX(60);
         bitmapview.setPivotY(80);
         handler.post(playrunnable);
-        ObjectAnimator animator=ObjectAnimator.ofFloat(bitmapview,"rotation",0,30);
+        ObjectAnimator animator = ObjectAnimator.ofFloat(bitmapview, "rotation", 0, 30);
         animator.setDuration(500);
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -301,9 +310,10 @@ public class SecondActivity extends BaseActivity {
         });
         animator.start();
     }
-    public void pauseplay(){
+
+    public void pauseplay() {
         handler.removeCallbacks(playrunnable);
-        ObjectAnimator stopanimatior=ObjectAnimator.ofFloat(bitmapview,"rotation",30,0);
+        ObjectAnimator stopanimatior = ObjectAnimator.ofFloat(bitmapview, "rotation", 30, 0);
         stopanimatior.setDuration(500);
         stopanimatior.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -313,21 +323,22 @@ public class SecondActivity extends BaseActivity {
         });
         stopanimatior.start();
     }
-    public void initview(){
-        sharedPreferences= PreferenceManager.getDefaultSharedPreferences(this);
-        editor=sharedPreferences.edit();
-        songtv=toolbar.findViewById(R.id.songname1);
-        singtv=toolbar.findViewById(R.id.singername1);
-        imageView= (ImageView) findViewById(R.id.backgroundimg);
-        play_last= (playlastview) findViewById(R.id.play_last);
-        play_next= (playnextview) findViewById(R.id.play_next);
-        listicon= (ImageView) findViewById(R.id.list_icon);
-        mPTimeTv= (TextView) findViewById(R.id.playing_time);
-        mMTimeTv= (TextView) findViewById(R.id.song_time);
-        Intent intent=getIntent();
-        playingitem=intent.getParcelableExtra("playingitem");
-        String picurl=playingitem.getBkimg();
-        Glide.with(SecondActivity.this).load(picurl).bitmapTransform(new BlurTransformation(SecondActivity.this, 20, 3) ).into(imageView);
+
+    public void initview() {
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        editor = sharedPreferences.edit();
+        songtv = toolbar.findViewById(R.id.songname1);
+        singtv = toolbar.findViewById(R.id.singername1);
+        imageView = (ImageView) findViewById(R.id.backgroundimg);
+        play_last = (playlastview) findViewById(R.id.play_last);
+        play_next = (playnextview) findViewById(R.id.play_next);
+        listicon = (ImageView) findViewById(R.id.list_icon);
+        mPTimeTv = (TextView) findViewById(R.id.playing_time);
+        mMTimeTv = (TextView) findViewById(R.id.song_time);
+        Intent intent = getIntent();
+        playingitem = intent.getParcelableExtra("playingitem");
+        String picurl = playingitem.getBkimg();
+        Glide.with(SecondActivity.this).load(picurl).bitmapTransform(new BlurTransformation(SecondActivity.this, 20, 3)).into(imageView);
         Glide.with(SecondActivity.this).load(picurl).asBitmap().into(target);
         songtv.setText(playingitem.getMusicname());
         singtv.setText(playingitem.getMusicauthor());
@@ -335,32 +346,31 @@ public class SecondActivity extends BaseActivity {
         listicon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                View view=getLayoutInflater().inflate(R.layout.musiclistdialog,null);
-                RecyclerView recyclerView=view.findViewById(R.id.musiclist);
+                View view = getLayoutInflater().inflate(R.layout.musiclistdialog, null);
+                RecyclerView recyclerView = view.findViewById(R.id.musiclist);
                 recyclerView.setLayoutManager(new LinearLayoutManager(SecondActivity.this));
                 recyclerView.setAdapter(new Myadapter(musicItemList));
-                MyDialog dialog=new MyDialog(SecondActivity.this);
+                MyDialog dialog = new MyDialog(SecondActivity.this);
                 dialog.setView(view);
                 dialog.show();
             }
         });
-        playmethod= (ImageView) findViewById(R.id.playmethod);
-        if (sharedPreferences.getInt("play_method",0)==0){
+        playmethod = (ImageView) findViewById(R.id.playmethod);
+        if (sharedPreferences.getInt("play_method", 0) == 0) {
             playmethod.setImageResource(R.drawable.play_icn_loop_prs);
-        }else {
+        } else {
             playmethod.setImageResource(R.drawable.play_icn_one_prs);
         }
         playmethod.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (sharedPreferences.getInt("play_method",0)==0){
+                if (sharedPreferences.getInt("play_method", 0) == 0) {
                     playmethod.setImageResource(R.drawable.play_icn_one_prs);
-                    editor.putInt("play_method",1);
+                    editor.putInt("play_method", 1);
                     binder.setplaymethod(1);
-                }
-                else{
+                } else {
                     playmethod.setImageResource(R.drawable.play_icn_loop_prs);
-                    editor.putInt("play_method",0);
+                    editor.putInt("play_method", 0);
                     binder.setplaymethod(0);
                 }
                 editor.apply();
@@ -379,42 +389,36 @@ public class SecondActivity extends BaseActivity {
             }
         });
     }
-    public void playNext(){
-        playingitem= musicItemList.get(position);
+
+    public void playNext() {
+        binder.playNext();
         seekBar.setProgress(binder.getMax());
         handler.post(playrunnable);
-        binder.setPlayingItem(playingitem);
-        if (position== musicItemList.size()-1){
-            binder.changeMusic(musicItemList.get(0).getPath());
-            position=0;
-        }else {
-            binder.changeMusic(musicItemList.get(position+1).getPath());
-            position=position+1;
-        }
-        lrcView.setScrollY(0);
-        initLrc();
+        playingitem=binder.getplayingitem();
         initbg();
+        lrcView.setScrollY(0);
+        if (relativeLayout.getVisibility() == View.INVISIBLE) {
+            initLrc();
+        }
     }
-    public void playLast(){
-        playingitem= musicItemList.get(position);
+
+    public void playLast() {
+        binder.playLast();
         seekBar.setMax(binder.getMax());
         handler.post(playrunnable);
-        binder.setPlayingItem(playingitem);
-        if (position==0){
-            binder.changeMusic(musicItemList.get(musicItemList.size()-1).getPath());
-            position= musicItemList.size()-1;
-        }else {
-            binder.changeMusic(musicItemList.get(position-1).getPath());
-            position=position-1;
-        }
-        lrcView.setScrollY(0);
-        initLrc();
+        playingitem=binder.getplayingitem();
         initbg();
+        lrcView.setScrollY(0);
+
+        if (relativeLayout.getVisibility() == View.INVISIBLE) {
+            initLrc();
+        }
     }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void Event(ChangeMessage message) {
-        playingitem=message.getMusicItem();
-        Log.d("tag",playingitem.getMusicname());
+        playingitem = message.getMusicItem();
+        Log.d("tag", playingitem.getMusicname());
         initbg();
     }
 
@@ -426,47 +430,50 @@ public class SecondActivity extends BaseActivity {
     }
 
 
-    class Myadapter extends RecyclerView.Adapter{
+    class Myadapter extends RecyclerView.Adapter {
         List<MusicItem> musiclist;
-        public Myadapter(List<MusicItem> list){
-            musiclist=list;
+
+        public Myadapter(List<MusicItem> list) {
+            musiclist = list;
         }
-        class MyViewHolder extends RecyclerView.ViewHolder{
-            TextView textView,textView2;
+
+        class MyViewHolder extends RecyclerView.ViewHolder {
+            TextView textView, textView2;
+
             public MyViewHolder(View itemView) {
                 super(itemView);
-                textView=itemView.findViewById(R.id.musicname);
-                textView2= itemView.findViewById(R.id.musicauthor);
+                textView = itemView.findViewById(R.id.musicname);
+                textView2 = itemView.findViewById(R.id.musicauthor);
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        position=getAdapterPosition();
-                        playingitem= musicItemList.get(getAdapterPosition());
-                        binder.setPlayingItem(playingitem);
-                        binder.changeMusic(musiclist.get(getAdapterPosition()).getPath());
-                        binder.setPosition(getAdapterPosition());
+                        position = getAdapterPosition();
+                        playingitem = musicItemList.get(position);
+                        binder.changeMusic(musiclist.get(position));
+                        binder.setPosition(position);
                         lrcView.setScrollY(0);
                         initbg();
-                        if (relativeLayout.getVisibility()==View.INVISIBLE){
+                        if (relativeLayout.getVisibility() == View.INVISIBLE) {
                             initLrc();
                         }
                     }
                 });
             }
         }
+
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.listdialogitem,parent,false);
-            MyViewHolder viewHolder=new MyViewHolder(view);
-            return  viewHolder;
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.listdialogitem, parent, false);
+            MyViewHolder viewHolder = new MyViewHolder(view);
+            return viewHolder;
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            MyViewHolder viewHolder= (MyViewHolder) holder;
-            String author=musiclist.get(position).getMusicauthor().equals("<unknown>")? "未知":musiclist.get(position).getMusicauthor();
+            MyViewHolder viewHolder = (MyViewHolder) holder;
+            String author = musiclist.get(position).getMusicauthor().equals("<unknown>") ? "未知" : musiclist.get(position).getMusicauthor();
             viewHolder.textView.setText(musiclist.get(position).getMusicname());
-            viewHolder.textView2.setText(" - "+author);
+            viewHolder.textView2.setText(" - " + author);
 
         }
 

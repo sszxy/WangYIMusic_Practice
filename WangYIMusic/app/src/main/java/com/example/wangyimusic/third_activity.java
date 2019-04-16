@@ -21,7 +21,7 @@ public class third_activity extends AppCompatActivity {
         textView= (TextView) findViewById(R.id.lrctext);
         MusicItem musicItem =getIntent().getParcelableExtra("music");
         address= musicItem.getLrc();
-        OkHttpUtil.GetHttp(address, new Callback() {
+        OkHttpUtil.getHttp(address, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
 

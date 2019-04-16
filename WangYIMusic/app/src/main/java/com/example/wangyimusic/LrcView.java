@@ -1,6 +1,5 @@
 package com.example.wangyimusic;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -20,11 +19,11 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class LrcView extends View implements View.OnTouchListener{
+public class LrcView extends View implements View.OnTouchListener {
     LrcBean mLrcBean;
     Paint mTextPaint;
     Paint mHighPaint;
-    String mDefaultText="找不到歌词";
+    String mDefaultText = "找不到歌词";
     long mLineSpace;
     long mLrcSpace;
     int mPosition;
@@ -34,7 +33,7 @@ public class LrcView extends View implements View.OnTouchListener{
     Scroller mScroller;
     MyPlayer mPlayer;
     int mTouchSlip;
-    boolean mFlag=false;
+    boolean mFlag = false;
 
     public LrcView(Context context) {
         super(context);
@@ -51,7 +50,7 @@ public class LrcView extends View implements View.OnTouchListener{
         initView();
     }
 
-    public void initView(){
+    public void initView() {
         mTextPaint = new Paint();
         mTextPaint.setDither(true);
         mTextPaint.setAntiAlias(true);
@@ -64,27 +63,27 @@ public class LrcView extends View implements View.OnTouchListener{
         mHighPaint.setAntiAlias(true);
         mHighPaint.setTextAlign(Paint.Align.CENTER);
         mHighPaint.setColor(Color.GREEN);
-        mHighPaint.setTextSize(60);
+        mHighPaint.setTextSize(55);
 
-        mLineSpace=20;
+        mLineSpace = 25;
         measureLineHeight();
-        mScroller=new Scroller(getContext());
-        mTouchSlip=  ViewConfiguration.get(getContext()).getScaledTouchSlop();
+        mScroller = new Scroller(getContext());
+        mTouchSlip = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         setOnTouchListener(this);
     }
 
-    public void setPlayer(MyPlayer player){
-        this.mPlayer=player;
+    public void setPlayer(MyPlayer player) {
+        this.mPlayer = player;
     }
 
-    public void measureLineHeight(){
-        Rect rect=new Rect();
-        mTextPaint.getTextBounds(mDefaultText,0,mDefaultText.length(),rect);
-        mLrcSpace = rect.height()+ mLineSpace;
+    public void measureLineHeight() {
+        Rect rect = new Rect();
+        mTextPaint.getTextBounds(mDefaultText, 0, mDefaultText.length(), rect);
+        mLrcSpace = rect.height() + mLineSpace;
     }
 
-    public void setLrc(String lrc){
-        OkHttpUtil.GetHttp(lrc, new Callback() {
+    public void setLrc(String lrc) {
+        OkHttpUtil.getHttp(lrc, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
 
@@ -92,26 +91,27 @@ public class LrcView extends View implements View.OnTouchListener{
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                InputStream inputStream=response.body().byteStream();
-                LrcBean bean=LrcAnalyze.AnalyzeLrc(inputStream,"UTF8");
+                InputStream inputStream = response.body().byteStream();
+                LrcBean bean = LrcAnalyze.AnalyzeLrc(inputStream, "UTF8");
                 setLrcBean(bean);
             }
         });
     }
-    public void setLrcBean(LrcBean bean){
-        this.mLrcBean=bean;
+
+    public void setLrcBean(LrcBean bean) {
+        this.mLrcBean = bean;
         invalidate();
     }
 
-    public void getCurrentPosition(){
-        if (mPlayer.getCurrentPosition()<mLrcBean.lineInfos.get(0).getStartTime()){
-            mPosition=0;
-        } else if (mPlayer.getCurrentPosition()>mLrcBean.lineInfos.get(mLrcBean.lineInfos.size()-1).getStartTime()) {
-            mPosition=mLrcBean.lineInfos.size()-1;
-        } else{
-            for (int i=0;i<=mLrcBean.lineInfos.size()-2;i++){
-                if (mPlayer.getCurrentPosition()>mLrcBean.lineInfos.get(i).startTime&&
-                        mPlayer.getCurrentPosition()<mLrcBean.lineInfos.get(i+1).startTime){
+    public void getCurrentPosition() {
+        if (mPlayer.getCurrentPosition() < mLrcBean.lineInfos.get(0).getStartTime()) {
+            mPosition = 0;
+        } else if (mPlayer.getCurrentPosition() > mLrcBean.lineInfos.get(mLrcBean.lineInfos.size() - 1).getStartTime()) {
+            mPosition = mLrcBean.lineInfos.size() - 1;
+        } else {
+            for (int i = 0; i <= mLrcBean.lineInfos.size() - 2; i++) {
+                if (mPlayer.getCurrentPosition() > mLrcBean.lineInfos.get(i).startTime &&
+                        mPlayer.getCurrentPosition() < mLrcBean.lineInfos.get(i + 1).startTime) {
                     mPosition = i;
                     break;
                 }
@@ -121,20 +121,20 @@ public class LrcView extends View implements View.OnTouchListener{
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mLrcBean!=null&&mPlayer!=null){
+        if (mLrcBean != null && mPlayer != null) {
             getCurrentPosition();
-            for (int i=0; i<mLrcBean.lineInfos.size();i++){
-                if (i==mPosition){
-                    canvas.drawText(mLrcBean.lineInfos.get(i).getContent(),getMeasuredWidth()/2,
-                            getMeasuredHeight()/2+i*mLrcSpace,mHighPaint);
-                }else {
-                    canvas.drawText(mLrcBean.lineInfos.get(i).getContent(),getMeasuredWidth()/2,
-                            getMeasuredHeight()/2+i*mLrcSpace,mTextPaint);
-                }
+            for (int i = 0; i < mLrcBean.lineInfos.size(); i++) {
+                    if (i == mPosition) {
+                        canvas.drawText(mLrcBean.lineInfos.get(i).getContent(), getMeasuredWidth() / 2,
+                                getMeasuredHeight() / 2 + i * mLrcSpace, mHighPaint);
+                    } else {
+                        canvas.drawText(mLrcBean.lineInfos.get(i).getContent(), getMeasuredWidth() / 2,
+                                getMeasuredHeight() / 2 + i * mLrcSpace, mTextPaint);
+                    }
             }
-            if (mCurrentPosition!=mPosition){
-                mScroller.startScroll(0,getScrollY(),0, (int) ((mPosition-mCurrentPosition)*mLrcSpace));
-                mCurrentPosition=mPosition;
+            if (mCurrentPosition != mPosition) {
+                mScroller.startScroll(0, getScrollY(), 0, (int) ((mPosition - mCurrentPosition) * mLrcSpace));
+                mCurrentPosition = mPosition;
                 invalidate();
             }
             postInvalidateDelayed(100);
@@ -151,22 +151,22 @@ public class LrcView extends View implements View.OnTouchListener{
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        switch (event.getAction()){
+        switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mDownY= (int) event.getY();
+                mDownY = (int) event.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
-                mMoveY= (int) event.getY();
-                if (mFlag||Math.abs(mDownY-mMoveY)>mTouchSlip){
-                    mFlag=true;
-                    scrollBy(0,mDownY-mMoveY);
-                    mDownY=mMoveY;
+                mMoveY = (int) event.getY();
+                if (mFlag || Math.abs(mDownY - mMoveY) > mTouchSlip) {
+                    mFlag = true;
+                    scrollBy(0, mDownY - mMoveY);
+                    mDownY = mMoveY;
                     return true;
                 }
                 return false;
             case MotionEvent.ACTION_UP:
-                if (mFlag){
-                    mFlag=false;
+                if (mFlag) {
+                    mFlag = false;
                     return true;
                 }
                 break;

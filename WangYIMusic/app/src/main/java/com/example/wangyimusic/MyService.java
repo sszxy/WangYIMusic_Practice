@@ -3,6 +3,7 @@ package com.example.wangyimusic;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Binder;
@@ -26,6 +27,7 @@ import EventClass.ChangeMessage;
 import Interface.MyserviceListener;
 
 public class MyService extends Service {
+    Context context=this;
     String path;
     int position;
     ArrayList<MusicItem> music_list=new ArrayList<>();
@@ -37,6 +39,13 @@ public class MyService extends Service {
     Gson gson;
     public playBinder binder=new playBinder();
     class playBinder extends Binder{
+        public boolean playerIsExists(){
+            if (player.getIsFirst()){
+                player.setIsFirst();
+                return false;
+            }
+            return true;
+        }
         public boolean isplaying(){
             return player.isplay();
         }
@@ -54,7 +63,28 @@ public class MyService extends Service {
         }
         public MyPlayer getPlayer(){return player;}
         public MusicItem getplayingitem(){
+            if (playingitem==null&&getLastPlaying()!=null){
+                playingitem=getLastPlaying();
+            }
             return playingitem;
+        }
+        public void playNext(){
+            if (position==music_list.size()-1){
+                position=0;
+            }else {
+                position++;
+            }
+            setPosition(position);
+            changeMusic(music_list.get(position));
+        }
+        public void playLast(){
+            if (position==0){
+                position=music_list.size()-1;
+            }else {
+                position--;
+            }
+            setPosition(position);
+            changeMusic(music_list.get(position));
         }
         public void setPlayingItem(MusicItem item){
             playingitem=item;
@@ -70,10 +100,27 @@ public class MyService extends Service {
         }
         public void setPosition(int position){player.setPosition(position);}
         public void setplaymethod(int id){player.setMediaPlayerMethod(id);}
-        public void changeMusic(String path){
-            player.setDataSourse(path);
+        public void changeMusic(MusicItem musicItem){
+            setPlayingItem(musicItem);
+            player.setDataSourse(musicItem.path);
             postEvent();
-        };
+        }
+        public void PlayIntent(Intent intent){
+            player.setIsFirst();
+            if (intent!=null){
+                position=intent.getIntExtra("position",0);
+                playingitem=intent.getParcelableExtra("playingitem");
+                Log.d("tag","path");
+            }
+            binder.setPlayingItem(playingitem);
+            player.setDataSourse(playingitem.getPath());
+            String data=preferences.getString("gsondata","");
+            if (!data.equals("")){
+                music_list=gson.fromJson(data,new TypeToken<ArrayList<MusicItem>>(){}.getType());
+            }
+            player.setListAndPosition(music_list,position);
+
+        }
         public void seekto(int progress){
             player.seekto(progress);
         }
@@ -93,27 +140,10 @@ public class MyService extends Service {
          message.setSinger(playingitem.getMusicauthor());
          message.setSongName(playingitem.getMusicname());
          EventBus.getDefault().post(message);
-     }
+    }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent!=null){
-         position=intent.getIntExtra("position",0);
-         playingitem=intent.getParcelableExtra("playingitem");
-         player=new MyPlayer(music_list, position, new MyserviceListener() {
-             @Override
-             public void onChange(MusicItem musicItem) {
-                 EventBus.getDefault().post(new ChangeMessage(musicItem));
-             }
-         });
-         binder.setPlayingItem(playingitem);
-         player.setDataSourse(playingitem.getPath());
-            Log.d("tag","path");
-        }
-        String data=preferences.getString("gsondata","");
-        if (!data.equals("")){
-            music_list=gson.fromJson(data,new TypeToken<ArrayList<MusicItem>>(){}.getType());
-        }
-
+        binder.PlayIntent(intent);
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -131,7 +161,12 @@ public class MyService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-       // EventBus.getDefault().register(this);
+        player=new MyPlayer(this, new MyserviceListener() {
+            @Override
+            public void onChange(MusicItem musicItem) {
+                EventBus.getDefault().post(new ChangeMessage(musicItem));
+            }
+        });
         preferences= PreferenceManager.getDefaultSharedPreferences(this);
         editor=preferences.edit();
         gson=new Gson();

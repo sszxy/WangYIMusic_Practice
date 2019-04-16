@@ -15,13 +15,13 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class OkHttpUtil {
-    public static void GetHttp(String address, Callback callback){
+    public static void getHttp(String address, Callback callback){
         OkHttpClient client=new OkHttpClient();
         Request request=new Request.Builder().url(address).build();
         client.newCall(request).enqueue(callback);
     }
 
-    public static void RxGetHttp(String baseUrl, long key,long id,Subscriber subscriber){
+    public static void rxGetHttp(String baseUrl, long key, long id, Subscriber subscriber){
         Retrofit retrofit=new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create())

@@ -27,6 +27,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -47,6 +48,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import Adapter.RecommendListAdapter;
 import EventClass.BottomChangeMessage;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -77,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     MusicItem playingitem;
     SharedPreferences preferences;
     SharedPreferences.Editor editor;
+    RecyclerView recommend_list_rcl;
     int num;
     private Handler handler=new Handler(){
         @Override
@@ -179,18 +182,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        frameLayout= (FrameLayout) findViewById(R.id.framelayout);
+        frameLayout= (FrameLayout) findViewById(R.id.bottom_frm);
         initbottomview();
         frameLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (binder.getplayingitem()==null){
-                    playingitem=binder.getLastPlaying();
+                playingitem=binder.getplayingitem();
+                if (!binder.playerIsExists()){
+                    Log.d("tag","没有启动");
                     Intent intent=new Intent(MainActivity.this,MyService.class);
                     intent.putExtra("playingitem",playingitem);
                     startService(intent);
-                }else {
-                    playingitem=binder.getplayingitem();
                 }
                 Intent intent=new Intent(MainActivity.this,SecondActivity.class);
                 intent.putExtra("playingitem",playingitem);
@@ -206,8 +208,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void initbottomview(){
         preferences= PreferenceManager.getDefaultSharedPreferences(this);
         editor=preferences.edit();
-        songtv= (TextView) findViewById(R.id.songname);
-        singertv= (TextView) findViewById(R.id.singername);
+        songtv= (TextView) findViewById(R.id.song_name_tv);
+        singertv= (TextView) findViewById(R.id.singer_name_tv);
         musicimg= (ImageView) findViewById(R.id.music_img);
         if (preferences.getString("lastplayingitem","").equals("")){
             frameLayout.setVisibility(View.GONE);
@@ -299,17 +301,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         wangyilist.add(mSongList);
         wangyilist.add(mFm);
         wangyilist.add(mPaiHang);
+        tabLayout.addTab(tabLayout.newTab());
+        tabLayout.addTab(tabLayout.newTab());
         wangyiviewpager.setAdapter(new wangyiadapter(wangyilist));
-        tabLayout.addTab(tabLayout.newTab());
-        tabLayout.addTab(tabLayout.newTab());
         tabLayout.addTab(tabLayout.newTab());
         tabLayout.addTab(tabLayout.newTab());
         tabLayout.setupWithViewPager(wangyiviewpager);
     }
     public void initSongList(){
-        String songlistadress="https://api.bzqll.com/music/netease/hotSongList?key=579621905&cat=全部&limit=16&offset=0";
+        String songlistadress="https://api.bzqll.com/music/netease/hotSongList?key=579621905&cat=全部&limit=18&offset=0";
         final RecyclerView recyclerView=mSongList.findViewById(R.id.song_list_rcl);
-        OkHttpUtil.GetHttp(songlistadress, new Callback() {
+        OkHttpUtil.getHttp(songlistadress, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
 
@@ -322,12 +324,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        initRecommendList(list.getData());
                         recyclerView.setLayoutManager(new GridLayoutManager(MainActivity.this,2));
                         recyclerView.setAdapter(new GridAdapter(list.getData()));
                     }
                 });
             }
         });
+    }
+
+    public void initRecommendList(List<SongListData.DataBean> listData){
+        recommend_list_rcl=findViewById(R.id.recommend_list_rcl);
+        final RecommendListAdapter adapter=new RecommendListAdapter(listData);
+        GridLayoutManager gridLayoutManager=new GridLayoutManager(MainActivity.this,3, GridLayoutManager.VERTICAL,false);
+        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                int type=adapter.getItemViewType(position);
+                if (type==RecommendListAdapter.RECOMMEND_ITEM){
+                    return 1;
+                }else {
+                    return 3;
+                }
+            }
+        });
+        recommend_list_rcl.setLayoutManager(gridLayoutManager);
+        recommend_list_rcl.setAdapter(adapter);
+        recommend_list_rcl.setNestedScrollingEnabled(false);
+
     }
 
     @Override
@@ -380,6 +404,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    public void setDrawerLayoutOpenListener(){
+        drawerLayout.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                drawerLayout.getViewTreeObserver().removeOnPreDrawListener(this);
+                drawerLayout.openDrawer(GravityCompat.START);
+                return false;
+            }
+        });
+    }
+
     private static boolean isGrantExternalRW(MainActivity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && activity.checkSelfPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -403,6 +438,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void setResult(BottomChangeMessage message){
+        if (frameLayout.getVisibility()==View.GONE){
+            frameLayout.setVisibility(View.VISIBLE);
+        }
         Glide.with(this).load(message.getPicUrl()).into(musicimg);
         singertv.setText(message.getSinger());
         songtv.setText(message.getSongName());

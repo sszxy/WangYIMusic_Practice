@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:paddingTop="10dp"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <ImageView
+        android:layout_gravity="center"
+        android:id="@+id/recommend_list_bg"
+        android:layout_width="115dp"
+        android:layout_height="115dp" />
+    <TextView
+        android:text="askldjf"
+        android:layout_gravity="center"
+        android:id="@+id/recommend_list_title"
+        android:textColor="#000000"
+        android:maxLines="2"
+        android:gravity="left"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content" />
+</LinearLayout>

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GridAdapter extends RecyclerView.Adapter {
-    public List<SongListData.DataBean> listGsons=new ArrayList<>();
+    public List<SongListData.DataBean> listGsons;
     public GridAdapter(List<SongListData.DataBean> gsonList){
         this.listGsons=gsonList;
     }

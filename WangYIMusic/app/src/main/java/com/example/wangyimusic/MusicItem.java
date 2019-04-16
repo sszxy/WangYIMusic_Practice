@@ -92,4 +92,16 @@ public class MusicItem implements Parcelable {
         dest.writeString(bkimg);
         dest.writeString(lrc);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof MusicItem){
+           if (((MusicItem) obj).getPath().equals(getPath())){
+                return true;
+            }
+            return false;
+        }else {
+            return  false;
+        }
+    }
 }

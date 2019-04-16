@@ -42,9 +42,9 @@ public class LocalMusicActivity extends AppCompatActivity {
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         setContentView(R.layout.activity_local_music);
         itemryc= (RecyclerView) findViewById(R.id.local_list);
-        songtv= (TextView) findViewById(R.id.songname);
-        singertv= (TextView) findViewById(R.id.singername);
-        musicimg= (ImageView) findViewById(R.id.songimg);
+        songtv= (TextView) findViewById(R.id.song_name_tv);
+        singertv= (TextView) findViewById(R.id.singer_name_tv);
+        musicimg= (ImageView) findViewById(R.id.song_bg_img);
         if (isGrantExternalRW(this)){
              cursor=getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 null,null,null,null);
@@ -67,7 +67,7 @@ public class LocalMusicActivity extends AppCompatActivity {
         }
         itemryc.setAdapter(new MyRecyclerViewAdapter());
         itemryc.setLayoutManager(new LinearLayoutManager(this));
-        layout= (FrameLayout) findViewById(R.id.framelayout);
+        layout= (FrameLayout) findViewById(R.id.bottom_frm);
         layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
