@@ -13,16 +13,22 @@ import com.example.wangyimusic.R;
 
 public class SongListFragment extends Fragment {
     public RecyclerView song_list_rcl;
+    View rootView;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view=inflater.inflate(R.layout.viewpager_songlist,container,false);
-        song_list_rcl=view.findViewById(R.id.song_list_rcl);
-        return view;
+        if (rootView==null){
+            rootView=inflater.inflate(R.layout.viewpager_songlist,container,false);
+            song_list_rcl=rootView.findViewById(R.id.song_list_rcl);
+        }
+        return rootView;
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (rootView!=null){
+            ((ViewGroup)rootView.getParent()).removeView(rootView);
+        }
     }
 }

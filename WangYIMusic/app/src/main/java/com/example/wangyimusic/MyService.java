@@ -165,6 +165,8 @@ public class MyService extends Service {
             @Override
             public void onChange(MusicItem musicItem) {
                 EventBus.getDefault().post(new ChangeMessage(musicItem));
+                binder.setPlayingItem(musicItem);
+                postEvent();
             }
         });
         preferences= PreferenceManager.getDefaultSharedPreferences(this);

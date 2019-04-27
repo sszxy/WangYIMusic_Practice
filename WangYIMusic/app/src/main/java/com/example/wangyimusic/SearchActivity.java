@@ -45,6 +45,7 @@ import Adapter.HistoryItemAdapter;
 import Adapter.MyFragmentAdapter;
 import EventClass.BottomChangeMessage;
 import Fragment.ListSearchFragment;
+import Fragment.MvSearchFragment;
 import Fragment.SongListFragment;
 import Interface.HistorySearchListener;
 import okhttp3.Call;
@@ -77,6 +78,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     FragmentManager fragmentManager=getSupportFragmentManager();
     Fragment song_list_fragment;
     Fragment list_search_fragment;
+    Fragment mv_search_fragment;
     MyService.playBinder binder;
     ServiceConnection connection=new ServiceConnection() {
         @Override
@@ -147,12 +149,16 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     public void initViewPager(){
         tabList.add("歌曲");
         tabList.add("歌单");
+        tabList.add("视频");
         search_tab=findViewById(R.id.search_tab);
         search_viewpager=findViewById(R.id.search_viewpager);
         song_list_fragment=new SongListFragment();
         list_search_fragment=new ListSearchFragment();
+        mv_search_fragment=new MvSearchFragment();
         fragmentList.add(song_list_fragment);
         fragmentList.add(list_search_fragment);
+        fragmentList.add(mv_search_fragment);
+        search_tab.addTab(search_tab.newTab());
         search_tab.addTab(search_tab.newTab());
         search_tab.addTab(search_tab.newTab());
         search_viewpager.setAdapter(new MyFragmentAdapter(fragmentManager,fragmentList,tabList));
