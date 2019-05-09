@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -43,7 +44,7 @@ public class SongListActivity extends AppCompatActivity implements View.OnClickL
     int scroll_length;
     String cover_url;
     String song_list_title;
-    String address="https://api.bzqll.com/music/netease/";
+    String address="https://api.itooi.cn/music/netease/";
     Toolbar toolbar;
     RecyclerView song_list_rcl;
     TextView title_tv;
@@ -119,6 +120,7 @@ public class SongListActivity extends AppCompatActivity implements View.OnClickL
     public void initView(){
         Intent intent=getIntent();
         id=intent.getLongExtra("song_list_id",0);
+        Log.d("tag",id+"");
         background_rla=findViewById(R.id.background_rla);
         toolbar=findViewById(R.id.my_toolbar);
         song_list_title=intent.getStringExtra("song_list_title");

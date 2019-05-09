@@ -6,6 +6,7 @@ import android.net.Uri;
 
 import com.danikula.videocache.HttpProxyCacheServer;
 import com.danikula.videocache.file.FileNameGenerator;
+import com.google.android.exoplayer2.upstream.cache.CacheUtil;
 
 import jp.wasabeef.glide.transformations.internal.Utils;
 
@@ -18,10 +19,9 @@ public class MyApplication extends Application {
     }
 
     private HttpProxyCacheServer newProxy() {
-            
             return new HttpProxyCacheServer.Builder(this)
                     .maxCacheFilesCount(100)//最大缓存文件数量
-                    .maxCacheSize(500 * 1024 * 1024)//最大缓存大小
+                    .maxCacheSize(1024 * 1024 * 1024)//最大缓存大小
                     .build();
 
     }

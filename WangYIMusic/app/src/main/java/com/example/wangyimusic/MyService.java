@@ -110,7 +110,7 @@ public class MyService extends Service {
             if (intent!=null){
                 position=intent.getIntExtra("position",0);
                 playingitem=intent.getParcelableExtra("playingitem");
-                Log.d("tag","path");
+                Log.d("tag",playingitem.getPath());
             }
             binder.setPlayingItem(playingitem);
             player.setDataSourse(playingitem.getPath());

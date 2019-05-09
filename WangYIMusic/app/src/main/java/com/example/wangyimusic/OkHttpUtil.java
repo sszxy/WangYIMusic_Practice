@@ -2,10 +2,13 @@ package com.example.wangyimusic;
 
 import com.google.gson.Gson;
 
+import java.io.IOException;
+
 import Interface.RxGetInterface;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -32,5 +35,17 @@ public class OkHttpUtil {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(subscriber);
+    }
+    public static String excuteHttp(String address){
+        String data = null;
+        OkHttpClient client=new OkHttpClient();
+        Request request=new Request.Builder().url(address).build();
+        try {
+        Response response = client.newCall(request).execute();
+        data=response.body().string();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return data;
     }
 }

@@ -35,12 +35,17 @@ public class MyPlayer {
 
     public void setDataSourse(String path) {
         try {
-            HttpProxyCacheServer server = MyApplication.getProxy(mContext);
-            String proxyUrl = server.getProxyUrl(path);
-            myplayer.reset();
-            myplayer.setDataSource(proxyUrl);
-           /* myplayer.reset();
-            myplayer.setDataSource(path  );*/
+            if (path.substring(0,4).equals("http")){
+                HttpProxyCacheServer server = MyApplication.getProxy(mContext);
+                String proxyUrl = server.getProxyUrl(path);
+                myplayer.reset();
+                myplayer.setDataSource(proxyUrl);
+            }
+            else {
+                 myplayer.reset();
+                 myplayer.setDataSource(path);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

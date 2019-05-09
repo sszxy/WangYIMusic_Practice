@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="5dp"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <com.google.android.exoplayer2.ui.PlayerView
+        android:id="@+id/mv_play_view"
+        app:controller_layout_id="@layout/my_player_controll_view"
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+    </com.google.android.exoplayer2.ui.PlayerView>
+    <ImageView
+        android:scaleType="centerCrop"
+        android:id="@+id/cover_img"
+        android:layout_width="match_parent"
+        android:layout_height="200dp" />
+    <ImageView
+        android:src="@drawable/mv_play"
+        android:alpha="0.5 "
+        android:id="@+id/cover_control_img"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="85dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp" />
+    <TextView
+        android:textSize="18dp"
+        android:id="@+id/mv_title"
+        android:textColor="#000000"
+        android:layout_below="@+id/mv_play_view"
+        android:layout_width="match_parent"
+        android:gravity="center_vertical"
+        android:layout_height="40dp">
+    </TextView>
+</RelativeLayout>

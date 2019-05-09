@@ -1,6 +1,5 @@
 package Fragment;
 
-
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,38 +9,38 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 
-import com.example.wangyimusic.ListSearchBean;
-import com.example.wangyimusic.MvItemBean;
+import com.example.wangyimusic.MvFoundBean;
 import com.example.wangyimusic.OkHttpUtil;
 import com.example.wangyimusic.R;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.gson.Gson;
 
 import java.io.IOException;
 
-import Adapter.ListSearchAdapter;
-import Adapter.MvSearchAdapter;
+import Adapter.MvFoundAdapter;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class MvSearchFragment extends Fragment {
+public class MvYearFragment extends Fragment {
     boolean isVisible = false;
     boolean isFirst = true;
-    boolean isPrepared = false;
-    RecyclerView mv_rcl;
+    boolean isPrepared = true;
+    RecyclerView mv_fount_rcl;
     View rootView;
+    ExoPlayer player;
     Gson gson = new Gson();
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Log.d("tag", "create");
-        rootView = inflater.inflate(R.layout.viewpager_mvlist, container, false);
-        mv_rcl = rootView.findViewById(R.id.mv_rcl);
-        isPrepared = true;
+        rootView = inflater.inflate(R.layout.mv_year_fragment, container, false);
+        mv_fount_rcl= rootView.findViewById(R.id.mv_year_rcl);
         return rootView;
+    }
+    public void setPlayer(ExoPlayer player){
+        this.player=player;
     }
 
     @Override
@@ -59,15 +58,14 @@ public class MvSearchFragment extends Fragment {
         if (isVisible && isPrepared && isFirst) {
             isFirst = false;
             initData();
+            Log.d("tag","chushihua");
         }
     }
 
     private void initData() {
-        Log.d("tag", "data");
-        EditText editText = getActivity().findViewById(R.id.search_edt);
-        String keyWord = editText.getText().toString();
-        String address = " https://api.itooi.cn/music/tencent/search?key=579621905&s=" + keyWord + "&limit=20&offset=0&type=mv";
-        OkHttpUtil.getHttp(address, new Callback() {
+        String mvFoundaddress="https://api.itooi.cn/music/tencent/hotMvList?key=579621905&year=12&tag=0&area=0&limit=10&offset=0";
+        Log.d("tag",mv_fount_rcl==null?"t":"f");
+        OkHttpUtil.getHttp(mvFoundaddress, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
 
@@ -75,16 +73,16 @@ public class MvSearchFragment extends Fragment {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String data = response.body().string();
-                final MvItemBean bean = gson.fromJson(data, MvItemBean.class);
+                String data=response.body().string();
+                final MvFoundBean bean=gson.fromJson(data,MvFoundBean.class);
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mv_rcl.setLayoutManager(new LinearLayoutManager(getActivity()));
-                        mv_rcl.setAdapter(new MvSearchAdapter(bean.getData()));
+                        final MvFoundAdapter adapter=new MvFoundAdapter(player,bean.getData(),getActivity());
+                        mv_fount_rcl.setLayoutManager(new LinearLayoutManager(getActivity()));
+                        mv_fount_rcl.setAdapter(adapter);
                     }
                 });
-
             }
         });
 

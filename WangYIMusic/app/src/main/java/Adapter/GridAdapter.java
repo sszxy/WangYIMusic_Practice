@@ -1,6 +1,7 @@
-package com.example.wangyimusic;
+package Adapter;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.example.wangyimusic.R;
+import com.example.wangyimusic.SongListActivity;
+import com.example.wangyimusic.SongListData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,23 +41,45 @@ public class GridAdapter extends RecyclerView.Adapter {
             });
         }
     }
+    class LoadMoreHolder extends RecyclerView.ViewHolder{
+        public LoadMoreHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (viewType==1){
+            View view=LayoutInflater.from(parent.getContext()).inflate(R.layout.load_more_view,parent,false);
+            LoadMoreHolder viewholder=new LoadMoreHolder(view);
+            return viewholder;
+        }else {
         View itemView= LayoutInflater.from(parent.getContext()).inflate(R.layout.song_list_item,parent,false);
         MyViewHolder viewHolder=new MyViewHolder(itemView);
         return viewHolder;
+        }
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        MyViewHolder viewHolder= (MyViewHolder) holder;
-        Glide.with(viewHolder.itemView.getContext()).load(listGsons.get(position).getCoverImgUrl()).into(viewHolder.cover_img);
-        viewHolder.cover_title.setText(listGsons.get(position).getTitle());
+        if (holder instanceof MyViewHolder){
+            MyViewHolder viewHolder= (MyViewHolder) holder;
+            Glide.with(viewHolder.itemView.getContext()).load(listGsons.get(position).getCoverImgUrl()).into(viewHolder.cover_img);
+            viewHolder.cover_title.setText(listGsons.get(position).getTitle());
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position==listGsons.size()){
+            return 1;
+        }else {
+            return 2;
+        }
     }
 
     @Override
     public int getItemCount() {
-        return listGsons.size();
+        return listGsons.size()+1;
     }
 }

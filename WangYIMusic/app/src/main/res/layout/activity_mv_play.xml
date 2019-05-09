@@ -5,5 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MvPlayActivity">
+    <com.google.android.exoplayer2.ui.PlayerView
+        android:id="@+id/play_view"
+        app:controller_layout_id="@layout/my_player_controll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </com.google.android.exoplayer2.ui.PlayerView>
 
 </android.support.constraint.ConstraintLayout>

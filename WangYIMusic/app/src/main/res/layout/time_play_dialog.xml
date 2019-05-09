@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:paddingLeft="15dp"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content">
+    <TextView
+        android:id="@+id/close_time_tv"
+        android:gravity="center_vertical"
+        android:textColor="#000000"
+        android:textSize="20dp"
+        android:text="定时停止播放"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+    <TextView
+        android:id="@+id/ten_min_tv"
+        android:textColor="#000000"
+        android:text="10分钟后"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+    <TextView
+        android:text="20分钟后"
+        android:textColor="#000000"
+        android:gravity="center_vertical"
+        android:id="@+id/twenty_min_tv"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+    <TextView
+        android:text="30分钟后"
+        android:textColor="#000000"
+        android:gravity="center_vertical"
+        android:id="@+id/thirty_min_tv"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+    <TextView
+        android:text="40分钟后"
+        android:textColor="#000000"
+        android:gravity="center_vertical"
+        android:id="@+id/fourty_min_tv"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+    <TextView
+        android:text="50分钟后"
+        android:textColor="#000000"
+        android:gravity="center_vertical"
+        android:id="@+id/fifty_min_tv"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+    <TextView
+        android:text="60分钟后"
+        android:textColor="#000000"
+        android:gravity="center_vertical"
+        android:id="@+id/one_hour_tv"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+
+
+</LinearLayout>

@@ -241,6 +241,9 @@ public class SecondActivity extends BaseActivity {
     }
 
     public void initLrc() {
+        if (playingitem.getLrc()==null){
+            return;
+        }
         OkHttpUtil.getHttp(playingitem.getLrc(), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -342,7 +345,6 @@ public class SecondActivity extends BaseActivity {
         Glide.with(SecondActivity.this).load(picurl).asBitmap().into(target);
         songtv.setText(playingitem.getMusicname());
         singtv.setText(playingitem.getMusicauthor());
-
         listicon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -352,7 +354,7 @@ public class SecondActivity extends BaseActivity {
                 recyclerView.setAdapter(new Myadapter(musicItemList));
                 MyDialog dialog = new MyDialog(SecondActivity.this);
                 dialog.setView(view);
-                dialog.show();
+                dialog.showBottom();
             }
         });
         playmethod = (ImageView) findViewById(R.id.playmethod);

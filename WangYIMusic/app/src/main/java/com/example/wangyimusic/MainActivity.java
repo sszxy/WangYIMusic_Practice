@@ -1,6 +1,7 @@
 package com.example.wangyimusic;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -13,8 +14,11 @@ import android.os.IBinder;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -25,6 +29,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -39,6 +44,11 @@ import android.os.Handler;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -48,22 +58,36 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import Adapter.GridAdapter;
+import Adapter.MyFragmentAdapter;
 import Adapter.RecommendListAdapter;
 import EventClass.BottomChangeMessage;
+import Fragment.MvArea2Fragment;
+import Fragment.MvAreaFragment;
+import Fragment.MvTopFragment;
+import Fragment.MvYearFragment;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     MyService.playBinder binder;
+    ExoPlayer mPlayer;
     LayoutInflater inflater;
     TabLayout tabLayout;
-    ViewPager viewPager;
+    TabLayout mvCategoryTab;
+    ViewPager mainViewPager;
     ViewPager wangyiviewpager;
     ViewPager lunboviewpager;
+    ViewPager mvCategoryPager;
+    SongListData songListData;
     List<View> item_list=new ArrayList<>();
     List<View> wangyilist=new ArrayList<>();
+    List<Fragment> mvCategoryList=new ArrayList<>();
     ArrayList<MusicItem> listen_list=new ArrayList<>();
+    View music_layout;
+    View wangyi_layout;
+    View mvFound_layout;
     View mSongList;
     View mFm;
     View mPaiHang;
@@ -80,7 +104,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     SharedPreferences preferences;
     SharedPreferences.Editor editor;
     RecyclerView recommend_list_rcl;
+    RecyclerView mv_fount_rcl;
     int num;
+    Gson gson;
+    List<TextView> timePlayList=new ArrayList<>();
+    Timer timer;
+    @SuppressLint("HandlerLeak")
     private Handler handler=new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -121,12 +150,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         setContentView(R.layout.activity_main);
+        gson=new Gson();
+        initExoPlayer();
         EventBus.getDefault().register(this);
         Toolbar toolbar = (Toolbar)findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
         Intent intent=new Intent(this,MyService.class);
         bindService(intent,connection,BIND_AUTO_CREATE);
         drawerLayout= (DrawerLayout) findViewById(R.id.drawerlayout);
+        initDrawerLayout();
         search_img= (ImageView) findViewById(R.id.search_icon);
         final ImageView musicview= (ImageView) findViewById(R.id.musicIcon);
         musicview.setSelected(true);
@@ -139,18 +171,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         drawlayoutview.setOnClickListener(this);
         search_img.setOnClickListener(this);
         inflater=getLayoutInflater();
-        View view1=inflater.inflate(R.layout.music_layout,null);
-        View view2=inflater.inflate(R.layout.wangyi_layout,null);
-        View view3=inflater.inflate(R.layout.friend_layout,null);
-        viewPager= (ViewPager) findViewById(R.id.item_viewpager);
-        tabLayout=(TabLayout) view2.findViewById(R.id.item_tablayout);
-        wangyiviewpager=(ViewPager) view2.findViewById(R.id.wangyi_viewpager);
+         music_layout=inflater.inflate(R.layout.music_layout,null);
+         wangyi_layout=inflater.inflate(R.layout.wangyi_layout,null);
+         mvFound_layout=inflater.inflate(R.layout.friend_layout,null);
+        mainViewPager =  findViewById(R.id.item_viewpager);
+        tabLayout= wangyi_layout.findViewById(R.id.item_tablayout);
+        wangyiviewpager=wangyi_layout.findViewById(R.id.wangyi_viewpager);
         initlunbo();
-        item_list.add(view1);
-        item_list.add(view2);
-        item_list.add(view3);
-        viewPager.setAdapter(new item_adapter(item_list));
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        item_list.add(music_layout);
+        item_list.add(wangyi_layout);
+        item_list.add(mvFound_layout);
+        mainViewPager.setAdapter(new item_adapter(item_list));
+        mainViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
@@ -201,9 +233,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
             }
         });
-        initMusicLayout(view1);
+        initMusicLayout(music_layout);
+        initDailyMusic();
+    }
 
-
+    public void initDailyMusic(){
+        ImageView daily_recommend=mViewRecommend.findViewById(R.id.daily_img);
+        daily_recommend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d("tag","aaa");
+                Intent intent=new Intent(MainActivity.this,RecommendDayActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+    public void initExoPlayer(){
+        mPlayer = ExoPlayerFactory.newSimpleInstance(
+                new DefaultRenderersFactory(this),
+                new DefaultTrackSelector(), new DefaultLoadControl());
+        mPlayer.setPlayWhenReady(true);
     }
     public void initbottomview(){
         preferences= PreferenceManager.getDefaultSharedPreferences(this);
@@ -299,7 +348,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initSongList();
         wangyilist.add(mViewRecommend);
         wangyilist.add(mSongList);
-        wangyilist.add(mFm);
         wangyilist.add(mPaiHang);
         tabLayout.addTab(tabLayout.newTab());
         tabLayout.addTab(tabLayout.newTab());
@@ -307,10 +355,84 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tabLayout.addTab(tabLayout.newTab());
         tabLayout.addTab(tabLayout.newTab());
         tabLayout.setupWithViewPager(wangyiviewpager);
+        //initMvFoundLayout();
+        initMvFoundLayout();
+    }
+
+    public void initMvFoundLayout(){
+        mvCategoryTab=mvFound_layout.findViewById(R.id.mv_category_tab);
+        mvCategoryPager=mvFound_layout.findViewById(R.id.mv_category_viewpager);
+        MvTopFragment mvTopFragment=new MvTopFragment();
+        mvTopFragment.setPlayer(mPlayer);
+        MvYearFragment mvYearFragment=new MvYearFragment();
+        mvYearFragment.setPlayer(mPlayer);
+        MvAreaFragment mvAreaFragment=new MvAreaFragment();
+        mvAreaFragment.setPlayer(mPlayer);
+        MvArea2Fragment mvArea2Fragment=new MvArea2Fragment();
+        mvArea2Fragment.setPlayer(mPlayer);
+        mvCategoryList.add(mvTopFragment);
+        mvCategoryList.add(mvYearFragment);
+        mvCategoryList.add(mvAreaFragment);
+        mvCategoryList.add(mvArea2Fragment);
+        List<String> list=new ArrayList<>();
+        list.add("热门");
+        list.add("2018");
+        list.add("港台");
+        list.add("欧美");
+        mvCategoryPager.setOffscreenPageLimit(3);
+        mvCategoryPager.setAdapter(new MyFragmentAdapter(getSupportFragmentManager(),mvCategoryList,list));
+        mvCategoryTab.setupWithViewPager(mvCategoryPager);
     }
     public void initSongList(){
-        String songlistadress="https://api.bzqll.com/music/netease/hotSongList?key=579621905&cat=全部&limit=18&offset=0";
+        final String songlistadress="https://api.itooi.cn/music/netease/hotSongList?key=579621905&cat=全部&limit=18&offset=0";
         final RecyclerView recyclerView=mSongList.findViewById(R.id.song_list_rcl);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            boolean isloading=false;
+            int nowLastItem;
+            String loadaddress="https://api.itooi.cn/music/netease/hotSongList?key=579621905&cat=全部&limit=18&offset=18";
+            @Override
+            public void onScrollStateChanged(@NonNull final RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState==RecyclerView.SCROLL_STATE_IDLE&&nowLastItem+1==recyclerView.getAdapter().getItemCount()){
+                    if (!isloading){
+                        isloading=true;
+                        OkHttpUtil.getHttp(loadaddress, new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+
+                            }
+
+                            @Override
+                            public void onResponse(Call call, Response response) throws IOException {
+                                try {
+                                    String data=response.body().string();
+                                    SongListData listData=gson.fromJson(data,SongListData.class);
+                                    songListData.getData().addAll(listData.getData());
+                                    Thread.sleep(1000);
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            recyclerView.getAdapter().notifyDataSetChanged();
+                                            recyclerView.getAdapter().notifyItemRemoved(recyclerView.getAdapter().getItemCount());
+                                            isloading=false;
+                                        }
+                                    });
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                GridLayoutManager manager= (GridLayoutManager) recyclerView.getLayoutManager();
+                nowLastItem=manager.findLastVisibleItemPosition();
+            }
+        });
         OkHttpUtil.getHttp(songlistadress, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -319,14 +441,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                Gson gson=new Gson();
-                final SongListData list=gson.fromJson(response.body().string(),SongListData.class);
+                 songListData =gson.fromJson(response.body().string(),SongListData.class);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        initRecommendList(list.getData());
-                        recyclerView.setLayoutManager(new GridLayoutManager(MainActivity.this,2));
-                        recyclerView.setAdapter(new GridAdapter(list.getData()));
+                        initRecommendList(songListData.getData());
+                        GridLayoutManager manager=new GridLayoutManager(MainActivity.this,2);
+                        manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                            @Override
+                            public int getSpanSize(int i) {
+                                if (i== songListData.getData().size()){
+                                    return 2;
+                                }
+                                return 1;
+                            }
+                        });
+                        recyclerView.setLayoutManager(manager);
+                        recyclerView.setAdapter(new GridAdapter(songListData.getData()));
                     }
                 });
             }
@@ -361,18 +492,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 drawerLayout.openDrawer(GravityCompat.START);
                 break;
             case R.id.musicIcon:
-                viewPager.setCurrentItem(0);
+                mainViewPager.setCurrentItem(0);
                 break;
             case R.id.WangyiIcon:
-                viewPager.setCurrentItem(1);
+                mainViewPager.setCurrentItem(1);
                 break;
             case R.id.friendIcon:
-                viewPager.setCurrentItem(2);
+                mainViewPager.setCurrentItem(2);
                 break;
             case R.id.search_icon:
                 Log.d("tag","adskf");
                 Intent intent=new Intent(MainActivity.this,SearchActivity.class);
                 startActivity(intent);
+                break;
+            case R.id.ten_min_tv:
+                runTimeTask(v);
+                break;
+            case R.id.twenty_min_tv:
+                runTimeTask(v);
+                break;
+            case R.id.thirty_min_tv:
+                runTimeTask(v);
+                break;
+            case R.id.fourty_min_tv:
+                runTimeTask(v);
+                break;
+            case R.id.fifty_min_tv:
+                runTimeTask(v);
+                break;
+            case R.id.one_hour_tv:
+                runTimeTask(v);
+                break;
+            case R.id.close_time_tv:
+                if (timer!=null){
+                    timer.cancel();
+                }
                 break;
             default:
                 break;
@@ -415,6 +569,79 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    public void initDrawerLayout(){
+        NavigationView navigationView=findViewById(R.id.naview);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                switch (menuItem.getItemId()){
+                    case R.id.time_paly:
+                        timePlay();
+                        break;
+                    case R.id.item_clock:
+                        break;
+                }
+                return true;
+            }
+        });
+    }
+    public void timePlay(){
+        timer=new Timer();
+        MyDialog dialog=new MyDialog(this);
+        View view=getLayoutInflater().inflate(R.layout.time_play_dialog,null);
+        dialog.setView(view);
+        dialog.showCenter();
+        TextView close_time_tv=view.findViewById(R.id.close_time_tv);
+        TextView ten_min_tv=view.findViewById(R.id.ten_min_tv);
+        TextView twenty_min_tv=view.findViewById(R.id.twenty_min_tv);
+        TextView thirty_min_tv=view.findViewById(R.id.thirty_min_tv);
+        TextView fourty_min_tv=view.findViewById(R.id.fourty_min_tv);
+        TextView fifty_min_tv=view.findViewById(R.id.fifty_min_tv);
+        TextView one_hour_tv=view.findViewById(R.id.one_hour_tv);
+        timePlayList.add(ten_min_tv);
+        timePlayList.add(twenty_min_tv);
+        timePlayList.add(thirty_min_tv);
+        timePlayList.add(fourty_min_tv);
+        timePlayList.add(fifty_min_tv);
+        timePlayList.add(one_hour_tv);
+        close_time_tv.setOnClickListener(this);
+        ten_min_tv.setOnClickListener(this);
+        twenty_min_tv.setOnClickListener(this);
+        fourty_min_tv.setOnClickListener(this);
+        thirty_min_tv.setOnClickListener(this);
+        fourty_min_tv.setOnClickListener(this);
+        fifty_min_tv.setOnClickListener(this);
+        one_hour_tv.setOnClickListener(this);
+
+    }
+
+    @SuppressLint("ResourceAsColor")
+    public void runTimeTask(View view){
+        for (int i=0;i<timePlayList.size();i++){
+            if (timePlayList.get(i)==view){
+                Log.d("tag","aha");
+                timePlayList.get(i).setTextColor(Color.parseColor("#FF4081"));
+                if (timer!=null){
+                    timer.cancel();
+                }
+                timer=new Timer();
+                int time=(i+1)*60*10*1000;
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        if (binder.isplaying()){
+                            binder.pause();
+                        }
+
+                    }
+                },time);
+            }else {
+                timePlayList.get(i).setTextColor(Color.BLACK);
+            }
+        }
+    }
+
+
     private static boolean isGrantExternalRW(MainActivity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && activity.checkSelfPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -444,5 +671,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Glide.with(this).load(message.getPicUrl()).into(musicimg);
         singertv.setText(message.getSinger());
         songtv.setText(message.getSongName());
+    }
+    public Timer getTimer(){
+        return timer;
     }
 }

@@ -23,45 +23,44 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class ListSearchFragment extends Fragment{
+public class ListSearchFragment extends Fragment {
     RecyclerView list_search_rcl;
-    boolean isVisible=false;
-    boolean isFirst=true;
-    boolean isPrepared=false;
+    boolean isVisible = false;
+    boolean isFirst = true;
+    boolean isPrepared = false;
     View rootView;
-    Gson gson=new Gson();
+    Gson gson = new Gson();
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        if (rootView==null){
-            rootView=inflater.inflate(R.layout.viewpager_songlist,container,false);
-            list_search_rcl=rootView.findViewById(R.id.song_list_rcl);
-            isPrepared=true;
-        }
+        rootView = inflater.inflate(R.layout.viewpager_songlist, container, false);
+        list_search_rcl = rootView.findViewById(R.id.song_list_rcl);
+        isPrepared = true;
         return rootView;
     }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if (getUserVisibleHint()){
-            isVisible=true;
+        if (getUserVisibleHint()) {
+            isVisible = true;
             LazyLoad();
         }
     }
 
     private void LazyLoad() {
-        if (isVisible&&isPrepared&&isFirst){
-            isFirst=false;
+        if (isVisible && isPrepared && isFirst) {
+            isFirst = false;
             initData();
         }
     }
 
     private void initData() {
-        EditText editText=getActivity().findViewById(R.id.search_edt);
-        String keyWord=editText.getText().toString();
-        String address="https://api.itooi.cn/music/netease/search?key=579621905&s="+keyWord+"&type=list&limit=10&offset=0";
-        Log.d("tag",address);
+        EditText editText = getActivity().findViewById(R.id.search_edt);
+        String keyWord = editText.getText().toString();
+        String address = "https://api.itooi.cn/music/netease/search?key=579621905&s=" + keyWord + "&type=list&limit=10&offset=0";
+        Log.d("tag", address);
         OkHttpUtil.getHttp(address, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -70,13 +69,13 @@ public class ListSearchFragment extends Fragment{
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String data=response.body().string();
-                final ListSearchBean bean=gson.fromJson(data,ListSearchBean.class);
+                String data = response.body().string();
+                final ListSearchBean bean = gson.fromJson(data, ListSearchBean.class);
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         list_search_rcl.setLayoutManager(new LinearLayoutManager(getActivity()));
-                        list_search_rcl.setAdapter(new ListSearchAdapter(bean.getData().getPlaylists(),getActivity()));
+                        list_search_rcl.setAdapter(new ListSearchAdapter(bean.getData().getPlaylists(), getActivity()));
                     }
                 });
 
@@ -87,8 +86,6 @@ public class ListSearchFragment extends Fragment{
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (rootView!=null){
-            ((ViewGroup)rootView.getParent()).removeView(rootView);
-        }
+
     }
 }

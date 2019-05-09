@@ -28,6 +28,11 @@
             android:enabled="true"
             android:exported="true" />
 
+        <service
+            android:name=".RecommendService"
+            android:enabled="true"
+            android:exported="true" />
+
         <activity android:name=".LocalMusicActivity" />
         <activity
             android:name=".SearchActivity"
@@ -35,7 +40,10 @@
         <activity android:name=".third_activity" />
         <activity android:name=".SongListActivity" />
         <activity android:name=".MainActivity" />
-        <activity android:name=".MvPlayActivity"></activity>
+        <activity
+            android:name=".MvPlayActivity"
+            android:screenOrientation="landscape"></activity>
+        <activity android:name=".RecommendDayActivity"></activity>
     </application>
 
 </manifest>

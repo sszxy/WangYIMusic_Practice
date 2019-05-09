@@ -21,7 +21,13 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
+
+import EventClass.BottomChangeMessage;
 
 public class LocalMusicActivity extends AppCompatActivity {
     ArrayList<MusicItem> list=new ArrayList<>();
@@ -62,6 +68,7 @@ public class LocalMusicActivity extends AppCompatActivity {
                 musicItem.setMusicalbum(album);
                 musicItem.setMusicauthor(artist);
                 musicItem.setMusicname(name);
+                musicItem.setBkimg("http://p2.music.126.net/btcyURN4b6L-sORW1UxbKg==/2910407279937382.jpg?param=400y400");
                 list.add(musicItem);
             }
         }
@@ -72,11 +79,10 @@ public class LocalMusicActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(LocalMusicActivity.this,SecondActivity.class);
-                intent.putExtra("musicname",songtv.getText().toString());
-                intent.putExtra("musicauthor",singertv.getText().toString());
+                intent.putExtra("playingitem",playingitem);
                 intent.putParcelableArrayListExtra("musiclist", list);
-                ActivityOptionsCompat optionsCompat=ActivityOptionsCompat.makeSceneTransitionAnimation(LocalMusicActivity.this,musicimg,"transition");
-                startActivity(intent,optionsCompat.toBundle());
+                //ActivityOptionsCompat optionsCompat=ActivityOptionsCompat.makeSceneTransitionAnimation(LocalMusicActivity.this,musicimg,"transition");
+                startActivity(intent);
             }
         });
     }
@@ -109,13 +115,19 @@ public class LocalMusicActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         position=getAdapterPosition();
                         Intent  intent=new Intent(LocalMusicActivity.this,MyService.class);
-                        //intent.putExtra("musicname",list.get(getAdapterPosition()).getMusicname());
-                        intent.putExtra("musicpath",list.get(getAdapterPosition()).getPath());
-                        //intent.putExtra("musicauthor",list.get(getAdapterPosition()).getMusicauthor());
-                        intent.putExtra("position",position);
+                        MusicItem item=list.get(getAdapterPosition());
+                        intent.putExtra("playingitem",item);
+                        playingitem=list.get(getAdapterPosition());
+                        intent.putExtra("musicpath",item.getPath());
                         startService(intent);
-                        songtv.setText(list.get(getAdapterPosition()).getMusicname());
-                        singertv.setText(list.get(getAdapterPosition()).getMusicauthor());
+                        songtv.setText(item.getMusicname());
+                        singertv.setText(item.getMusicauthor());
+                        Glide.with(itemView.getContext()).load(item.getBkimg());
+                        BottomChangeMessage message=new BottomChangeMessage();
+                        message.setPicUrl(playingitem.getBkimg());
+                        message.setSongName(playingitem.getMusicname());
+                        message.setSinger(playingitem.getMusicauthor());
+                        EventBus.getDefault().post(message);
                     }
                 });
             }

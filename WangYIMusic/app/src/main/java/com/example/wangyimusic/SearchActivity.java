@@ -162,6 +162,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         search_tab.addTab(search_tab.newTab());
         search_tab.addTab(search_tab.newTab());
         search_viewpager.setAdapter(new MyFragmentAdapter(fragmentManager,fragmentList,tabList));
+        search_viewpager.setOffscreenPageLimit(2);
         search_tab.setupWithViewPager(search_viewpager);
     }
 
@@ -250,7 +251,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     public void searchMusic(String key){
         search_viewpager.setVisibility(View.VISIBLE);
         history_rcl.setVisibility(View.GONE);
-        address="https://api.bzqll.com/music/netease/search?key=579621905&s=" +
+        address="https://api.itooi.cn/music/netease/search?key=579621905&s=" +
                 key+"&type=song&limit=40&offset=0";
         OkHttpUtil.getHttp(address, new Callback() {
             WangYiJson json;
@@ -314,6 +315,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                         intent.putExtra("playingitem",playingitem);
                         String gsondata=gson.toJson(listen_list);
                         editor.putString("gsondata",gsondata);
+                        Log.d("tag",gsondata);
                         editor.apply();
                         startService(intent);
                     }

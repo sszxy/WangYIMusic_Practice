@@ -13,8 +13,7 @@ public class MyDialog extends AlertDialog {
         super(context,R.style.quick_option_dialog);
     }
 
-    @Override
-    public void show() {
+    public void showBottom() {
         super.show();
         WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
         layoutParams.gravity = Gravity.BOTTOM;
@@ -22,5 +21,14 @@ public class MyDialog extends AlertDialog {
         layoutParams.height = 1000;
         getWindow().setAttributes(layoutParams);
         getWindow().setWindowAnimations(R.style.Myanimation);
+    }
+    public void showCenter(){
+        super.show();
+        WindowManager.LayoutParams layoutParams=getWindow().getAttributes();
+        layoutParams.gravity=Gravity.CENTER;
+        layoutParams.width=800;
+        layoutParams.height=ViewGroup.LayoutParams.WRAP_CONTENT;
+        getWindow().setAttributes(layoutParams);
+        //getWindow().setWindowAnimations(R.style.Myanimation);
     }
 }

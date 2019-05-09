@@ -37,6 +37,7 @@ public class MvSearchAdapter extends RecyclerView.Adapter {
                 @Override
                 public void onClick(View v) {
                     Intent intent=new Intent(itemView.getContext(),MvPlayActivity.class);
+                    intent.putExtra("mv_id",dataBeans.get(getAdapterPosition()).getV_id());
                     itemView.getContext().startActivity(intent);
                 }
             });
